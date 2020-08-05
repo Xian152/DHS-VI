@@ -10,9 +10,9 @@
     decode `var', gen(`var'_lab)
 	replace `var'_lab = lower(`var'_lab )
 	replace  `var'_skill= 1 if ///
-	(regexm(`var'_lab,"doctor|nurse|midwife|aide soignante|assistante accoucheuse|clinical officer|mch aide|trained|auxiliary birth attendant|physician assistant|professional|ferdsher|skilled|community health care provider|birth attendant|hospital/health center worker|hew|auxiliary|icds|feldsher|mch|vhw|village health team|health personnel|gynecolog(ist|y)|obstetrician|internist|pediatrician|family welfare visitor|medical assistant|health assistant") ///
-	&!regexm(`var'_lab,"na^|-na|traditional birth attendant|untrained|unquallified|empirical midwife|other")) 
-	replace `var'_skill = . if mi(`var') | `var' == 99 | mi(`var'_lab)
+	(regexm(`var'_lab,"doctor|nurse|midwife|aide soignante|assistante accoucheuse|clinical officer|mch aide|trained|auxiliary birth attendant|physician assistant|professional|ferdsher|skilled|community health care proVIder|birth attendant|hospital/health center worker|auxiliary|icds|feldsher|mch|vhw|VIllage health team|health personnel|gynecolog(ist|y)|obstetrician|internist|pediatrician|family welfare VIsitor|medical assistant|health assistant") ///
+	&!regexm(`var'_lab,"na^|-na|traditional birth attendant|untrained|unqualified|empirical midwife|other|obstetrician|health assistant|health fieldworker|health worker") | regexm(`var'_lab,"other doctor| trained traditional birth attendant|matron with ")  )
+	replace `var'_skill = . if mi(`var') | `var' == 99 | mi(`var'_lab)|`var' == 98
 	}
 	
 	/* consider as skilled if contain words in 
