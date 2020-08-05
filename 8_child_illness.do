@@ -30,8 +30,8 @@ order *,sequential  //make sure variables are in order.
 	    foreach var of varlist h12a-h12x {
 	    local lab: variable label `var' 	   
         replace `var' = . if ///
-	    regexm("`lab'","( other|shop|pharmacy|market|kiosk|relative|Other|friend|church|drug|addo|rescuer|trad|unqualified|stand|cabinet|ayush|^na)") ///
-	    & !regexm("`lab'","(ngo|hospital|medical center|worker)")  
+	    (regexm("`lab'","( other|shop|Shop|store|Store|Market|pharmacy|market|Pharmacy|at home|kiosk|Traditional Practitioner|dispenser/compounder|Street|other public -|other private -|other -|Diarrhea: CS public sector|Diarrhea: CS private medical|Traditional practitioner|Relatives|diarrhea: cs private medical|volunteer|merchant|relative|Other|friend|church|drug|addo|rescuer|trad|unqualified|stand|cabinet|ayush|^na|-na|na-|NA-|NA -|na -|diarrhea: cs public sector)") ///
+	    & !regexm("`lab'","(ngo|hospital|medical center|worker|women|cabinet|rescuer|national|cnss|NGO med.|health stand|moving)")) & !regexm("`lab'", "( lay)") 
 	    replace `var' = . if !inlist(`var',0,1) 
 	    }
 	   /* do not consider formal if contain words in 
@@ -47,14 +47,15 @@ order *,sequential  //make sure variables are in order.
         gen c_diarrhea_mof = (h38 == 5) if !inlist(h38,.,8,9) & c_diarrhea == 1
 
 *c_diarrhea_medfor Get formal medicine except (ors hmf home other_med, country specific). 
+	recode h12z h15 h15a h15b h15c h15d h15e h15f h15g h15h h15i (8 9 =.)
         egen medfor = rowtotal(h12z h15 h15a h15b h15c h15e h15g h15h h15i),mi
-		gen c_diarrhea_medfor = ( medfor > = 1 & medfor!=.) if c_diarrhea == 1
+		gen c_diarrhea_medfor = ( medfor > = 1) if c_diarrhea == 1 & medfor!=.
 		// formal medicine don't include "home remedy, herbal medicine and other"
-        replace c_diarrhea_medfor = . if (h12z == 8 | h15 == 8 | h15a == 8 | h15b == 8 | h15c == 8 | h15e == 8  | h15g == 8 | h15h == 8 | h15i == 8 )                                       
+        // replace c_diarrhea_medfor = . if (h12z == 8 | h15 == 8 | h15a == 8 | h15b == 8 | h15c == 8 | h15e == 8  | h15g == 8 | h15h == 8 | h15i == 8 )                                       
 *c_diarrhea_med	Child with diarrhea received any medicine other than ORS or hmf (country specific)
         egen med = rowtotal(h12z h15 h15a h15b h15c h15d h15e h15f h15g h15h h15i),mi
-        gen c_diarrhea_med = ( med > = 1 & med !=.) if c_diarrhea == 1
-        replace c_diarrhea_med = . if (h12z == 8 | h15 == 8 | h15a == 8 | h15b == 8 | h15c == 8 | h15d == 8 | h15e == 8 | h15f == 8 | h15g == 8 | h15h == 8 | h15i == 8 )
+        gen c_diarrhea_med = ( med > = 1 ) if c_diarrhea == 1 & med !=.
+        //replace c_diarrhea_med = . if (h12z == 8 | h15 == 8 | h15a == 8 | h15b == 8 | h15c == 8 | h15d == 8 | h15e == 8 | h15f == 8 | h15g == 8 | h15h == 8 | h15i == 8 )
 		
 *c_diarrheaact	Child with diarrhea seen by provider OR given any form of formal treatment
         gen c_diarrheaact = (c_diarrhea_pro==1 | c_diarrhea_medfor==1 | c_diarrhea_hmf==1 | c_treatdiarrhea==1) if c_diarrhea == 1
@@ -67,7 +68,7 @@ order *,sequential  //make sure variables are in order.
         gen c_fever = (h22 == 1) if !inlist(h22,.,8,9)
 		
 *c_sevdiarrhea	Child with severe diarrhea
-		gen eat = (inlist(h39,0,1,2)) if !inlist(h39,.,8,9) & c_diarrhea == 1
+		gen eat = inlist(h39,0,1,2) if !inlist(h39,.,8,9) & c_diarrhea == 1
         gen c_sevdiarrhea = (c_diarrhea==1 & (c_fever == 1 | c_diarrhea_mof == 1 | eat == 1)) 
 		replace c_sevdiarrhea = . if c_diarrhea == . | c_fever == . | (c_diarrhea == 1 & (c_diarrhea_mof ==.| eat==.))
 		/* diarrhea in last 2 weeks AND any of the following three conditions: fever OR offered 
@@ -79,7 +80,7 @@ order *,sequential  //make sure variables are in order.
 		replace c_sevdiarrheatreat = . if c_sevdiarrhea == . | c_diarrhea_pro == .
 		
 *c_sevdiarrheatreat_q	IV (intravenous) treatment of severe diarrhea among children with any formal provider visits
-        gen iv = (h15c == 1) if !inlist(h15,.,8,9) & c_diarrhea == 1
+        gen iv = (h15c == 1) if !inlist(h15c,.,8,9) & c_diarrhea == 1
 		gen c_sevdiarrheatreat_q = (iv ==1 ) if c_sevdiarrheatreat == 1
 	
 		
@@ -106,8 +107,8 @@ order *,sequential  //make sure variables are in order.
 	    foreach var of varlist h32a-h32x {
 	    local lab: variable label `var' 
         replace `var' = . if ///
-	    regexm("`lab'","( other|shop|pharmacy|market|kiosk|relative|friend|Other|church|drug|addo|rescuer|trad|unqualified|stand|cabinet|ayush|^na)") ///
-	    & !regexm("`lab'","(ngo|hospital|medical center|worker)")  
+	    (regexm("`lab'","( other|shop|pharmacy|Shop|store|Store|Market|pharmacy|market|Pharmacy|at home|kiosk|Traditional Practitioner|dispenser/compounder|Street|other public -|other private -|other -|Fever/cough: CS public sector|Fever/cough: CS private medical|Traditional practitioner|Relatives|fever/cough: cs private medical|volunteer|merchant|market|kiosk|relative|friend|Other|church|drug|addo|rescuer|trad|unqualified|stand|cabinet|ayush|^na|-na|na-|NA-|na -|NA -|fever/cough: cs public sector)") ///
+	    & !regexm("`lab'","(ngo|hospital|medical center|worker|women|cabinet|rescuer|national|cnss|NGO med.|health stand|moving)")) & !regexm("`lab'", "( lay)") 
 		replace `var' = . if !inlist(`var',0,1) 
 	    }
 	    /* do not consider formal if contain words in 
