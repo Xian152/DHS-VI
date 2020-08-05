@@ -24,41 +24,9 @@ order *,sequential  //make sure variables are in order.
 	   the first group but don't contain any words in the second group */
     egen sba_skill = rowtotal(m3a-m3m),mi
 	
-	if inlist(name, "Bangladesh2011", "Bangladesh2014", "Comoros2012"){
+	if inlist(name, "Benin2011", ){
 	drop sba_skill
 	foreach var of varlist m3a-m3c{
-	replace `var' = . if !inlist(`var',0,1)	
-	}
-	egen sba_skill = rowtotal(m3a m3b m3c m3d m3e m3f),mi
-	}
-
-	if inlist(name, "Benin2011", "Burundi2010"){
-	drop sba_skill
-	foreach var of varlist m3a-m3c{
-	replace `var' = . if !inlist(`var',0,1)	
-	}
-	egen sba_skill = rowtotal(m3a m3b m3c),mi
-	}
-	
-	if inlist(name, "BurkinaFaso2010"){
-	drop sba_skill
-	foreach var of varlist m3a m3b m3c m3d m3e{
-	replace `var' = . if !inlist(`var',0,1)	
-	}
-	egen sba_skill = rowtotal(m3a m3b m3c m3d m3e),mi
-	}
-	
-	if inlist(name,"Chad2014"){
-	drop sba_skill
-	foreach var of varlist m3a m3b m3c m3d{
-	replace `var' = . if !inlist(`var',0,1)	
-	}
-	egen sba_skill = rowtotal(m3a m3b m3c),mi
-	}
-	
-	if inlist(name, "Congodr2013"){
-	drop sba_skill
-	foreach var of varlist m3a m3b m3c{
 	replace `var' = . if !inlist(`var',0,1)	
 	}
 	egen sba_skill = rowtotal(m3a m3b m3c),mi
@@ -72,7 +40,7 @@ order *,sequential  //make sure variables are in order.
 	egen sba_skill = rowtotal(m3a m3b),mi
 	}
 	
-	if inlist(name, "Gambia2013", "Guatemala2014","Haiti2012", "Honduras2011","Mozambique2011", "Nigeria2013", "Senegal2010","Senegal2012","Senegal2015"){
+	if inlist(name, "Haiti2012", "Nigeria2013"){
 	drop sba_skill
 	foreach var of varlist m3a m3b m3c{
 	replace `var' = . if !inlist(`var',0,1)	
@@ -96,14 +64,6 @@ order *,sequential  //make sure variables are in order.
 	egen sba_skill = rowtotal(m3a m3b m3d),mi
 	}
 	
-	if inlist(name, "Niger2012"){
-	drop sba_skill
-	foreach var of varlist m3a m3b m3d{
-	replace `var' = . if !inlist(`var',0,1)	
-	}
-	egen sba_skill = rowtotal(m3a m3b m3d),mi
-	}
-	
 	
 	*c_hospdel: child born in hospital of births in last 2 years  
 	decode m15, gen(m15_lab)
@@ -111,21 +71,29 @@ order *,sequential  //make sure variables are in order.
 	
 	gen c_hospdel = 0 if !mi(m15)
 	replace c_hospdel = 1 if ///
-    regexm(m15_lab,"medical college|surgical") | ///
-	regexm(m15_lab,"hospital") & !regexm(m15_lab,"center|sub-center")
+	regexm(m15_lab,"medical college|surgical") | ///
+	(regexm(m15_lab,"hospital") & !regexm(m15_lab,"home")) & !regexm(m15_lab,"center|sub-center|clin|clinic")
 	replace c_hospdel = . if mi(m15) | m15 == 99 | mi(m15_lab)	
     // please check this indicator in case it's country specific	
 	
 	*c_facdel: child born in formal health facility of births in last 2 years
 	gen c_facdel = 0 if !mi(m15)
-	replace c_facdel = 1 if regexm(m15_lab,"hospital|maternity|health center|dispensary") | ///
-	!regexm(m15_lab,"home|other private|other$|pharmacy|non medical|private nurse|religious|abroad|india|other public|tba")
+	replace c_facdel = 1 if (regexm(m15_lab,"hospital|maternity|health center|clinic|dispensary") & !regexm(m15_lab,"home")) | ///
+	!regexm(m15_lab,"home|other private|other$|pharmacy|non medical|private nurse|religious|abroad|india|tba") | regexm(m15_lab,"health home|hospital/clin")
 	replace c_facdel = . if mi(m15) | m15 == 99 | mi(m15_lab)
 
+	if inlist(name,"Kenya2014"){
+		replace c_facdel = 1 if m15==32 
+	}
+	
+	if inlist(name,"Yemen2013"){
+		replace c_facdel = 1 if m15==31 | m15==41 
+	}
+	
 	*c_earlybreast: child breastfed within 1 hours of birth of births in last 2 years
 	gen c_earlybreast = .
 	
-	replace c_earlybreast = 0 if m4 != .    //  based on Last born children who were ever breastfed
+	replace c_earlybreast = 0 if !inlist(m4,.,97,98,99)//  based on Last born children who were ever breastfed
 	replace c_earlybreast = 1 if inlist(m34,0,100)
 	replace c_earlybreast = . if inlist(m34,999,299,199)
 	
@@ -137,9 +105,24 @@ order *,sequential  //make sure variables are in order.
 	}
 	gen c_skin2skin = .
 
+	if inlist(name, "Armenia2010"){
+	drop c_skin2skin
+	gen c_skin2skin = (s433a  == 1) if  !mi(s435ai)
+	}
+	
 	if inlist(name, "Bangladesh2014"){
 	drop c_skin2skin
 	gen c_skin2skin = (s435ai  == 1) if   !inlist(s435ai,.,8) 
+	}
+	
+	if inlist(name, "Nepal2011"){
+	drop c_skin2skin
+	gen c_skin2skin = (s431g  == 1) if   !inlist(s431g,.,8) 
+	}
+	
+	if inlist(name, "Philippines2013"){
+	drop c_skin2skin
+	gen c_skin2skin = (s435  == 1) if   !inlist(s435,.,8,9) 
 	}
 	
 	*c_sba: Skilled birth attendance of births in last 2 years: go to report to verify how "skilled is defined"
@@ -155,9 +138,10 @@ order *,sequential  //make sure variables are in order.
 	clonevar c_caesarean = m17
 	replace c_caesarean =. if m17==9
 	
-	gen stay = 0 if m15 != .
-	replace stay = 1 if stay == 0 & (inrange(m61,124,198)|inrange(m61,201,298)|inrange(m61,301,398))
+	gen stay = 0 if !inlist(m15,.,99)
+	replace stay = 1 if stay == 0 & (inrange(m61,124,198)|inrange(m61,200,298)|inrange(m61,301,398))
 	replace stay = . if inlist(m61,199,299,998) // filter question, based on m15
+	
 	gen c_sba_eff1 = (c_facdel == 1 & c_sba == 1 & stay == 1 & c_earlybreast == 1) 
 	replace c_sba_eff1 = . if c_facdel == . | c_sba == . | stay == . | c_earlybreast == . 
 	// you may need to check if this code work for all countries, which is the case in Recode VII. In this case, you don't need if inlist() anymore.
