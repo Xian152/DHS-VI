@@ -16,55 +16,15 @@ order *,sequential  //make sure variables are in order.
 	foreach var of varlist m3a-m3m {
 	local lab: variable label `var' 
     replace `var' = . if ///
-	!regexm("`lab'"," trained") & (!regexm("`lab'","doctor|nurse|Assistance|midwife|mifwife|aide soignante|assistante accoucheuse|clinical officer|mch aide|auxiliary birth attendant|physician assistant|professional|ferdsher|feldshare|skilled|community health care provider|birth attendant|hospital/health center worker|hew|auxiliary|icds|feldsher|mch|vhw|village health team|health personnel|gynecolog(ist|y)|obstetrician|internist|pediatrician|family welfare visitor|medical assistant|health assistant|general practitioner|matron") ///
-	|regexm("`lab'","na^|-na|na -|Na- |trained traditional birth attendant|traditional birth attendant|untrained|unqualified|empirical midwife|box"))
+    	!regexm("`lab'"," trained") & (!regexm("`lab'","doctor|nurse|Assistance|midwife|lady|mifwife|aide soignante|assistante accoucheuse|clinical officer|mch aide|auxiliary birth attendant|physician assistant|professional|ferdsher|feldshare|skilled|birth attendant|hospital/health center worker|auxiliary|icds|feldsher|mch|village health team|health personnel|gynecolog(ist|y)|obstetrician|internist|pediatrician|medical assistant|matrone|general practitioner") ///
+	|regexm("`lab'","na^|-na|na -|Na- |NA -|husband/partner|matron |family welfare|Family welfare|student|homeopath|hakim|herself|traditionnel|Other|neighbor|provider|vhw|Friend|Relative|fieldworker|Health Worker|other|health worker|friend|relative|traditional birth attendant|hew|health assistant|untrained|unqualified|sub-assistant|empirical midwife|box")) & !(regexm("`lab'","doctor") & regexm("`lab'","other")){
+
 	replace `var' = . if !inlist(`var',0,1)
 	 }
 	/* do consider as skilled if contain words in 
 	   the first group but don't contain any words in the second group */
     egen sba_skill = rowtotal(m3a-m3m),mi
-	
-	if inlist(name, "Benin2011", ){
-	drop sba_skill
-	foreach var of varlist m3a-m3c{
-	replace `var' = . if !inlist(`var',0,1)	
-	}
-	egen sba_skill = rowtotal(m3a m3b m3c),mi
-	}
-	
-	if inlist(name, "Ethiopia2011", "Pakistan2012"){
-	drop sba_skill
-	foreach var of varlist m3a m3b{
-	replace `var' = . if !inlist(`var',0,1)	
-	}
-	egen sba_skill = rowtotal(m3a m3b),mi
-	}
-	
-	if inlist(name, "Haiti2012", "Nigeria2013"){
-	drop sba_skill
-	foreach var of varlist m3a m3b m3c{
-	replace `var' = . if !inlist(`var',0,1)	
-	}
-	egen sba_skill = rowtotal(m3a m3b m3c),mi
-	}
-	
-	if inlist(name, "Guinea2012"){
-	drop sba_skill
-	foreach var of varlist m3a m3b m3c m3d{
-	replace `var' = . if !inlist(`var',0,1)	
-	}
-	egen sba_skill = rowtotal(m3a m3b m3c m3d),mi
-	}
-	
-	if inlist(name, "Mali2012"){
-	drop sba_skill
-	foreach var of varlist m3a m3b m3d{
-	replace `var' = . if !inlist(`var',0,1)	
-	}
-	egen sba_skill = rowtotal(m3a m3b m3d),mi
-	}
-	
-	
+
 	*c_hospdel: child born in hospital of births in last 2 years  
 	decode m15, gen(m15_lab)
 	replace m15_lab = lower(m15_lab)
