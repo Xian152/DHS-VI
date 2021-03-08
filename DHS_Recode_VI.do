@@ -2,7 +2,7 @@
 *** DHS MONITORING: VI
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-version 15.0
+//version 15.0
 clear all
 set matsize 3956, permanent
 set more off, permanent
@@ -20,7 +20,7 @@ macro drop _all
 global root "/Users/xianzhang/Dropbox/DHS"
 
 * Define path for data sources
-global SOURCE "${root}/RAW DATA/Recode VI"
+global SOURCE "/Volumes/alan/DHS/RAW DATA/Recode VI"
 
 * Define path for output data
 global OUT "${root}/STATA/DATA/SC/FINAL"
@@ -34,14 +34,7 @@ global DO "${root}/STATA/DO/SC/DHS/Recode VI"
 * Define the country names (in globals) in by Recode
 do "${DO}/0_GLOBAL.do" 
 
-// Armenia2010 Bangladesh2011 Bangladesh2014 Benin2011 BurkinaFaso2010 Burundi2010 Cambodia2014 Cameroon2011 Chad2014 Comoros2012 Congorep2011 Congodr2013
-// DominicanRepublic2013 Egypt2014 Ethiopia2011 Gabon2012 Gambia2013 Ghana2014 Guatemala2014 Guinea2012 Haiti2012 Honduras2011 Indonesia2012 
-// Jordan2012 Kenya2014 KyrgyzRepublic2012 Lesotho2014 Mali2012 Mozambique2011
-// Namibia2013  Nepal2011 Niger2012 Pakistan2012 Rwanda2010 Rwanda2014
-// Senegal2016  Tajikistan2012 Togo2013  Yemen2013 Zambia2013 Zimbabwe2010
-
-foreach name in Jordan2012 Kenya2014 KyrgyzRepublic2012 Lesotho2014 Mali2012 Mozambique2011 Namibia2013  Nepal2011 Niger2012 Pakistan2012 Rwanda2010 Rwanda2014{	
-
+foreach name in $DHScountries_Recode_VI {
 tempfile birth ind men hm hiv hh iso 
 
 
@@ -97,7 +90,7 @@ gen hm_age_yrs = v012
     do "${DO}/4_sexual_health"
     do "${DO}/5_woman_anthropometrics"
     do "${DO}/16_woman_cancer"
-	do "${DO}/17_woman_cancer_age_ref.do"
+	*do "${DO}/17_woman_cancer_age_ref.do"
 	
 	
 *housekeeping for ind data
@@ -162,6 +155,8 @@ save `hh'
 ***match with external iso data
 use "${SOURCE}/external/iso", clear 
 keep country iso2c iso3c
+replace country = "KyrgyzRepublic" if country == "Kyrgyzstan"
+
 save `iso'
 
 ***merge all subset of microdata
@@ -241,12 +236,18 @@ gen name = "`name'"
 	egen surveyid = concat(surveyname SurveyId )
 	}
 	
+	if inlist(name,"CotedIvoire2011"){
+	rename  surveyid  SurveyId
+	gen surveyname= "CI"
+	egen surveyid = concat(surveyname SurveyId )
+	}
+	
 	preserve
 	do "${DO}/Quality_control"
 	save "${INTER}/quality_control-`name'",replace
     restore 
 
-	
+
 *** Specify sample size to HEFPI
 	
     ***for variables generated from 1_antenatal_care 2_delivery_care 3_postnatal_care
@@ -288,7 +289,7 @@ gen name = "`name'"
     }
 	
 *** Label variables
-    drop bidx surveyid
+    cap drop bidx surveyid
     do "${DO}/Label_var"
 	
 save "${OUT}/DHS-`name'.dta", replace  
