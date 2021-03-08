@@ -3,7 +3,7 @@
 ********************
 /*
 note: 
-add [a_bp_meas_ref], [a_inpatient_ref]
+add [a_inpatient_ref]
 use "if inlist" instead of "capture" for sys&dial, in case the variables listed in "capture" appears in other surveys but not related to BP. 
 */
 *a_inpatient	18y+ household member hospitalized, recall period as close to 12 months as possible  (1/0)
@@ -56,9 +56,8 @@ use "if inlist" instead of "capture" for sys&dial, in case the variables listed 
 		replace a_inpatient_ref =6
 	}
 	
-*a_bp_meas & a_bp_meas_ref	 18y+ having their blood pressure measured by health professional, as close to last 1 year as possible 
+*a_bp_meas	 18y+ having their blood pressure measured by health professional, as close to last 1 year as possible 
     gen a_bp_meas = . 
-	gen a_bp_meas_ref =""		
 		
 *a_bp_treat	18y + being treated for high blood pressure 
     gen a_bp_treat = . 
@@ -190,7 +189,7 @@ use "if inlist" instead of "capture" for sys&dial, in case the variables listed 
 	}
 	
 	if inlist(name, "KyrgyzRepublic2012") {
-		drop a_bp_treat a_bp_sys a_bp_dial  a_hi_bp140_or_on_med a_bp_meas_ref
+		drop a_bp_treat a_bp_sys a_bp_dial  a_hi_bp140_or_on_med 
 		tempfile t1 t2
 		preserve 
 		use "${SOURCE}/DHS-KyrgyzRepublic2012/DHS-KyrgyzRepublic2012ind.dta", clear	
@@ -242,7 +241,7 @@ use "if inlist" instead of "capture" for sys&dial, in case the variables listed 
 	}	
 	
 	if inlist(name, "Lesotho2014") {
-		drop a_bp_treat a_diab_treat a_bp_meas a_hi_bp140 a_hi_bp140_or_on_med a_bp_meas_ref
+		drop a_bp_treat a_diab_treat a_bp_meas a_hi_bp140 a_hi_bp140_or_on_med 
 		
 		tempfile t1 t2
 		preserve 
