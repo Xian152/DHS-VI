@@ -94,10 +94,6 @@ order *,sequential  //make sure variables are in order.
         gen iv = (h15c == 1) if !inlist(h15c,.,8,9) & c_diarrhea == 1   // Lesotho2014 CotedIvoire2011 Namibia2013 Togo2013 KyrgyzRepublic2012 iv=0
 		gen c_sevdiarrheatreat_q = (iv ==1 ) if c_sevdiarrheatreat == 1
 		
-		if inlist(name, ""){  
-			replace c_sevdiarrheatreat_q =.
-		}
-		
 		gen ccough=(h31  ==1|h31  ==2)  if !inlist(h31,.,8,9)
 *c_ari	Child with acute respiratory infection (ARI)
 		gen c_ari = 0 if ccough != .
